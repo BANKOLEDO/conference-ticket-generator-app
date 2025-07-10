@@ -1,0 +1,51 @@
+@layer base {
+  :root {
+    --neutral-0: hsl(0, 0%, 100%);
+    --neutral-300: hsl(252, 6%, 83%);
+    --neutral-500: hsl(245, 15%, 58%);
+    --neutral-700: hsl(245, 19%, 35%);
+    --neutral-800: hsla(245, 19%, 35%, 0.2);
+    --neutral-900: hsl(248, 70%, 10%);
+    --orange-500: hsl(7, 88%, 67%);
+    --orange-700: hsl(7, 71%, 60%);
+  }
+
+  @layer base {
+  html,
+  body,
+  #root {
+    @apply h-full w-full m-0 p-0 box-border bg-red-950 ;
+  }
+}
+
+}
+
+@layer components {
+  .input-box {
+    @apply w-full p-4 rounded-xl border text-[--neutral-300] font-bold bg-[--neutral-800] placeholder-[--neutral-300];
+  }
+
+  .input-box:hover {
+    @apply bg-white/20 transition;
+  }
+
+  .input-label {
+    @apply mb-2 text-sm font-semibold text-[--neutral-300];
+  }
+
+  .btn-primary {
+    @apply w-full font-bold text-[--neutral-900] bg-[--orange-500] p-4 rounded-lg hover:bg-[--orange-700] transition text-center;
+  }
+
+  .form-container {
+    @apply px-4 w-full max-w-lg;
+  }
+
+  .upload-box {
+    @apply absolute flex flex-col items-center justify-center p-4 w-full border-2 border-dashed rounded-xl text-center bg-[--neutral-800] border-[--neutral-500] cursor-pointer transition;
+  }
+
+  .upload-box:hover {
+    @apply border-[--orange-500];
+  }
+}

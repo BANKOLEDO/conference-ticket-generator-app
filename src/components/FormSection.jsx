@@ -5,6 +5,14 @@ const FormSection = ({ onGenerate }) => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [github, setGithub] = useState("");
+  const [dragOver, setDragOver] = useState(false);
+
+  const [formErrors, setFormErrors] = useState({
+    avatar: "",
+    fullName: "",
+    email: "",
+    github: "",
+  });
 
   const fileInputRef = useRef(null);
   const uploadedImageURL = avatar ? URL.createObjectURL(avatar) : null;
@@ -13,46 +21,63 @@ const FormSection = ({ onGenerate }) => {
   const isEmailValid = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const validateAndSetFile = (file) => {
     if (!file) return;
 
+    let error = "";
+
     if (!["image/png", "image/jpeg"].includes(file.type)) {
-      alert("Upload must be PNG or JPG.");
-      return;
+      error = "Upload must be JPG or PNG.";
+    } else if (file.size > 512000) {
+      error = "File too large. Please upload a photo under 500KB.";
     }
 
-    if (file.size > 512000) {
-      alert("Max size is 500KB.");
+    if (error) {
+      setFormErrors((prev) => ({ ...prev, avatar: error }));
       return;
     }
 
     setAvatar(file);
+    setFormErrors((prev) => ({ ...prev, avatar: "" }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    validateAndSetFile(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+
+    const file = e.dataTransfer.files[0];
+    validateAndSetFile(file);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!fullName || !email || !github || !avatar) {
-      alert("Fill in all fields and upload an image.");
-      return;
-    }
+    const errors = {
+      avatar: avatar ? "" : "Please upload an avatar.",
+      fullName: fullName ? "" : "Full name is required.",
+      email: isEmailValid(email) ? "" : "Please enter a valid email address.",
+      github: isGithubValid(github) ? "" : "GitHub username must start with '@'.",
+    };
 
-    if (!isEmailValid(email)) {
-      alert("Invalid email.");
-      return;
-    }
+    setFormErrors(errors);
 
-    if (!isGithubValid(github)) {
-      alert("GitHub must start with '@'.");
-      return;
-    }
+    const hasErrors = Object.values(errors).some((msg) => msg !== "");
+    if (hasErrors) return;
 
     onGenerate({ fullName, email, github, avatar });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-container relative text-white z-6 space-y-6 mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="form-container relative text-white z-6 space-y-6 mx-auto"
+    >
       {/* Upload Avatar */}
       <div>
         <label className="upload-avatar-label block font-bold text-[--neutral-300] mb-5">
@@ -60,10 +85,18 @@ const FormSection = ({ onGenerate }) => {
         </label>
 
         <div
-          className="upload-box relative"
+          className={`upload-box relative border-2 rounded-md p-4 ${
+            dragOver ? "border-[--orange-500] bg-[--neutral-800]" : "border-transparent"
+          }`}
           onClick={(e) => {
             if (!e.target.closest(".upload-btn")) fileInputRef.current.click();
           }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
         >
           <div className="upload-preview h-20 flex justify-center items-center relative z-10">
             {!avatar ? (
@@ -119,6 +152,12 @@ const FormSection = ({ onGenerate }) => {
           />
           <small>Upload JPG or PNG under 500KB.</small>
         </div>
+
+        {formErrors.avatar && (
+          <p className="text-red-500 text-sm mt-2 font-medium">
+            {formErrors.avatar}
+          </p>
+        )}
       </div>
 
       {/* Full Name */}
@@ -129,11 +168,19 @@ const FormSection = ({ onGenerate }) => {
         <input
           id="full-name"
           type="text"
-          className="input-box"
+          className={`input-box ${formErrors.fullName ? "border-red-500" : ""}`}
           value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          required
+          onChange={(e) => {
+            const value = e.target.value;
+            setFullName(value);
+            if (value.trim() !== "") {
+              setFormErrors((prev) => ({ ...prev, fullName: "" }));
+            }
+          }}
         />
+        {formErrors.fullName && (
+          <p className="text-red-500 text-sm mt-1">{formErrors.fullName}</p>
+        )}
       </div>
 
       {/* Email */}
@@ -145,11 +192,19 @@ const FormSection = ({ onGenerate }) => {
           id="email"
           type="email"
           placeholder="example@email.com"
-          className="input-box"
+          className={`input-box ${formErrors.email ? "border-red-500" : ""}`}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          onChange={(e) => {
+            const value = e.target.value;
+            setEmail(value);
+            if (isEmailValid(value)) {
+              setFormErrors((prev) => ({ ...prev, email: "" }));
+            }
+          }}
         />
+        {formErrors.email && (
+          <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+        )}
       </div>
 
       {/* GitHub */}
@@ -161,11 +216,19 @@ const FormSection = ({ onGenerate }) => {
           id="github"
           type="text"
           placeholder="@yourusername"
-          className="input-box"
+          className={`input-box ${formErrors.github ? "border-red-500" : ""}`}
           value={github}
-          onChange={(e) => setGithub(e.target.value)}
-          required
+          onChange={(e) => {
+            const value = e.target.value;
+            setGithub(value);
+            if (isGithubValid(value)) {
+              setFormErrors((prev) => ({ ...prev, github: "" }));
+            }
+          }}
         />
+        {formErrors.github && (
+          <p className="text-red-500 text-sm mt-1">{formErrors.github}</p>
+        )}
       </div>
 
       {/* Submit Button */}

@@ -42,7 +42,7 @@
   }
 
   .upload-box {
-    @apply absolute flex flex-col items-center justify-center p-4 w-full border-2 border-dashed rounded-xl text-center bg-[--neutral-800] border-[--neutral-500] cursor-pointer transition;
+    @apply absolute flex flex-col items-center justify-center p-4 w-full border-2 border-white border-dashed rounded-xl text-center bg-[--neutral-800] border-[--neutral-500] cursor-pointer transition;
   }
 
   .upload-box:hover {

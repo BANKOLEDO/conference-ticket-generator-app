@@ -85,8 +85,8 @@ const FormSection = ({ onGenerate }) => {
         </label>
 
         <div
-          className={`upload-box relative border-2 rounded-md p-4 ${
-            dragOver ? "border-[--orange-500] bg-[--neutral-800]" : "border-transparent"
+          className={`upload-box relative border-2 border-dashed rounded-md p-4 ${
+            dragOver ? "border-[--orange-500]" : "border-white"
           }`}
           onClick={(e) => {
             if (!e.target.closest(".upload-btn")) fileInputRef.current.click();
@@ -98,6 +98,7 @@ const FormSection = ({ onGenerate }) => {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
         >
+
           <div className="upload-preview h-20 flex justify-center items-center relative z-10">
             {!avatar ? (
               <img
